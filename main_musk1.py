@@ -12,7 +12,7 @@ import numpy as np
 
 # Training settings
 parser = argparse.ArgumentParser(description='FLV')
-parser.add_argument('--epochs', type=int, default=100, metavar='N',
+parser.add_argument('--epochs', type=int, default=50, metavar='N',
                     help='number of epochs to train (default: 100)')
 parser.add_argument('--folds', type=int, default=10, metavar='N',
                     help='number of folds for cross validation (default: 10)')
@@ -22,7 +22,7 @@ parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
 parser.add_argument('--no-cuda', action='store_true', default=True,
                     help='disables CUDA training')
-parser.add_argument('--model', type=str, default='attnet', help='Choose b/w attnet and minet')
+parser.add_argument('--model', type=str, default='minet', help='Choose b/w attnet and minet')
 # parser.add_argument('--dataset', type=str, default='mask1', help='Choose b/w elephant, fox and tiger')
 
 args = parser.parse_args()
@@ -81,7 +81,7 @@ def test(test_loader, model):
     test_error /= len(test_loader)
     test_loss /= len(test_loader)
     print('Test Set, Loss: {:.4f}, Test error: {:.4f}'.format(test_loss.cpu().numpy(), test_error))
-    return predictions
+    return predictions, 1-test_error
 
 def get_model():
     if args.model == 'attnet':
@@ -102,7 +102,7 @@ if __name__ == '__main__':
     accs = np.zeros((run, n_folds), dtype=float)
     for irun in range(run):
         accs_v=[]
-        aucs=[]
+        # aucs=[]
         dataset = load_dataset('musk1', n_folds)
         model, optimizer = get_model()
         for ifold in range(n_folds):
@@ -118,24 +118,25 @@ if __name__ == '__main__':
             
             for e in range(args.epochs):
                 train(e, train_set, model, optimizer)
-            predictions = test(test_set, model)
+            predictions, acc = test(test_set, model)
 
-            _, y_ts = split_data_label(test_set)
-            auc=auc_roc(y_ts, predictions)
-            print (f'auc (fold {ifold})=',auc)
-            f, t, a=metrics.roc_curve(y_ts, predictions)
-            AN=sum(x<0 for x in np.array(y_ts))
-            AP=sum(x>0 for x in np.array(y_ts))
-            TN=(1.0-f)*AN
-            TP=t*AP
-            Acc2=(TP+TN)/len(y_ts)
-            acc=max(Acc2)
+            # _, y_ts = split_data_label(test_set)
+            # # auc=auc_roc(y_ts, predictions)
+            # auc = 0
+            # print (f'auc (fold {ifold})=',auc)
+            # f, t, a=metrics.roc_curve(y_ts, predictions)
+            # AN=sum(x==0 for x in np.array(y_ts))
+            # AP=sum(x==1 for x in np.array(y_ts))
+            # TN=(1.0-f)*AN
+            # TP=t*AP
+            # Acc2=(TP+TN)/len(y_ts)
+            # acc=max(Acc2)
             print (f'accuracy (fold {ifold})=', acc)
             accs_v.append(acc)
-            aucs.append(auc)
+            # aucs.append(auc)
             accs[irun][ifold] = acc
 
-        print ("\nmean auc=", np.mean(aucs))
+        # print ("\nmean auc=", np.mean(aucs))
         print ("mean acc=", np.mean(accs_v))
 
     print('\n\nFINAL: mean accuracy = ', np.mean(accs))

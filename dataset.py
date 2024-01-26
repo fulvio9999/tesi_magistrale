@@ -24,7 +24,7 @@ def create_bags_mat(path):
     labels=[]
     for i in set(ids):
         bags.append(np.array(f[ids==i]))
-        labels.append(l[ids==i][0])
+        labels.append(0 if l[ids==i][0] == -1 else 1)
     bags=np.array(bags, dtype=object)
     labels=np.array(labels)
     return bags, labels
