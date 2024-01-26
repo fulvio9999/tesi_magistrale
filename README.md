@@ -9,10 +9,14 @@
 - python main.py --model=attnet --dataset=elephant
 - python main.py --model=attnet --dataset=fox
 - python main.py --model=attnet --dataset=tiger
+- python main_mask1.py --model=attnet
 
 ### mi-net (https://arxiv.org/abs/1610.02501):
 - python main.py --model=minet --dataset=elephant
 - python main.py --model=minet --dataset=fox
 - python main.py --model=minet --dataset=tiger
+- python main_mask1.py --model=minet
 
-#### PS: default epochs=10, folds=10, no_cuda=True
+#### Default values: 
+- Elephant, fox and tiger: epochs=10, folds=10, run=5, no_cuda=True
+- mask1: epochs=100, folds=10, run=5, no_cuda=True

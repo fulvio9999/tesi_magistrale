@@ -1,24 +1,19 @@
 import argparse
-import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
 import torch
-
 import numpy as np
-from torch.utils.data import Dataset, DataLoader
 from sklearn.metrics import roc_auc_score as auc_roc
 from sklearn import metrics
-import scipy.io
-from sklearn.model_selection import StratifiedKFold
-from dataset import MyDataset, create_bags_mat
 from AttNet import Attention
+from dataset import convertToBatch, load_dataset, split_data_label
 from miNet import MiNet
+import numpy as np
 
 # Training settings
 parser = argparse.ArgumentParser(description='FLV')
-parser.add_argument('--epochs', type=int, default=10, metavar='N',
-                    help='number of epochs to train (default: 10)')
+parser.add_argument('--epochs', type=int, default=100, metavar='N',
+                    help='number of epochs to train (default: 100)')
 parser.add_argument('--folds', type=int, default=10, metavar='N',
                     help='number of folds for cross validation (default: 10)')
 parser.add_argument('--run', type=int, default=5, metavar='N',
@@ -27,8 +22,8 @@ parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
 parser.add_argument('--no-cuda', action='store_true', default=True,
                     help='disables CUDA training')
-parser.add_argument('--model', type=str, default='minet', help='Choose b/w attnet and minet')
-parser.add_argument('--dataset', type=str, default='elephant', help='Choose b/w elephant, fox and tiger')
+parser.add_argument('--model', type=str, default='attnet', help='Choose b/w attnet and minet')
+# parser.add_argument('--dataset', type=str, default='mask1', help='Choose b/w elephant, fox and tiger')
 
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
@@ -38,17 +33,7 @@ if args.cuda:
     torch.cuda.manual_seed(args.seed)
     print('\nGPU is ON!')
 
-if args.dataset == 'elephant':
-    path = 'data\\elephant_100x100_matlab.mat'
-elif args.dataset == 'fox':
-    path = 'data\\fox_100x100_matlab.mat'
-elif args.dataset == 'tiger':
-    path = 'data\\tiger_100x100_matlab.mat'
-else:
-    print("ERRORE: nome dataset errato!")
-    exit(1)
-
-def train(epoch, train_loader,model, optimizer):
+def train(epoch, train_loader, model, optimizer):
     model.train()
     train_loss = 0.
     train_error = 0.
@@ -56,7 +41,7 @@ def train(epoch, train_loader,model, optimizer):
         bag_label = label[0]
         if args.cuda:
             data, bag_label = data.cuda(), bag_label.cuda()
-        data = data.float()
+        # data = data.float()
         data, bag_label = Variable(data), Variable(bag_label)
 
         optimizer.zero_grad()
@@ -100,53 +85,56 @@ def test(test_loader, model):
 
 def get_model():
     if args.model == 'attnet':
-        model = Attention(input_dim=230).cuda() if args.cuda else Attention(input_dim=230)
-        optimizer = torch.optim.Adam(model.parameters(),lr=5e-4, betas=(0.9, 0.999), weight_decay=1e-3)
+        model = Attention(input_dim=166).cuda() if args.cuda else Attention(input_dim=166)
+        optimizer = optim.SGD(model.parameters(), lr=5e-4, weight_decay=0.005, momentum=0.9, nesterov=True)
     elif args.model == 'minet':
-        model = MiNet(230, 1, pooling_mode='max')
+        model = MiNet(166, 1, pooling_mode='max')
         optimizer = optim.SGD(model.parameters(), lr=5e-4, weight_decay=0.005, momentum=0.9, nesterov=True)
     else:
         print("ERRORE: nome modello errato!")
         exit(1)
     return model, optimizer
 
-if __name__ == "__main__":   
-    accs = np.zeros((args.run, args.folds), dtype=float)
-    for irun in range(args.run):
+if __name__ == '__main__':
+    # perform five times 10-fold cross-validation experiments
+    run = 5
+    n_folds = 10
+    accs = np.zeros((run, n_folds), dtype=float)
+    for irun in range(run):
         accs_v=[]
         aucs=[]
-        bags, labels=create_bags_mat(path=path)
-        skf = StratifiedKFold(n_splits=args.folds, shuffle=True)
+        dataset = load_dataset('musk1', n_folds)
         model, optimizer = get_model()
-        for idx, (tr, ts) in enumerate(skf.split(bags, labels)):
-    
-            print('\n\nrun=', irun, '  fold=', idx)
-            bags_tr=bags[tr]
-            y_tr=labels[tr]
-            bags_ts=bags[ts]
-            y_ts=labels[ts]
+        for ifold in range(n_folds):
+            print('\n\nrun=', irun, '  fold=', ifold)
 
-            loader_training = DataLoader(MyDataset(bags_tr, y_tr), batch_size=1)
-            loader_test = DataLoader(MyDataset(bags_ts, y_ts), batch_size=1)
+            train_bags = dataset[ifold]['train']
+            test_bags = dataset[ifold]['test']
 
+            # convert bag to batch
+            train_set = convertToBatch(train_bags)
+            test_set = convertToBatch(test_bags)
+            dimension = train_set[0][0].shape[1]
+            
             for e in range(args.epochs):
-                train(e, loader_training, model, optimizer)
-            predictions = test(loader_test, model)
+                train(e, train_set, model, optimizer)
+            predictions = test(test_set, model)
 
+            _, y_ts = split_data_label(test_set)
             auc=auc_roc(y_ts, predictions)
-            aucs.append(auc)
-            print (f'auc (fold {idx})=',auc)
+            print (f'auc (fold {ifold})=',auc)
             f, t, a=metrics.roc_curve(y_ts, predictions)
-            AN=sum(x<0 for x in y_ts)
-            AP=sum(x>0 for x in y_ts)
+            AN=sum(x<0 for x in np.array(y_ts))
+            AP=sum(x>0 for x in np.array(y_ts))
             TN=(1.0-f)*AN
             TP=t*AP
             Acc2=(TP+TN)/len(y_ts)
             acc=max(Acc2)
-            print (f'accuracy (fold {idx})=', acc)
-            accs[irun][idx] = acc
+            print (f'accuracy (fold {ifold})=', acc)
             accs_v.append(acc)
-        
+            aucs.append(auc)
+            accs[irun][ifold] = acc
+
         print ("\nmean auc=", np.mean(aucs))
         print ("mean acc=", np.mean(accs_v))
 
