@@ -9,14 +9,16 @@
 - python main.py --model=attnet --dataset=elephant
 - python main.py --model=attnet --dataset=fox
 - python main.py --model=attnet --dataset=tiger
-- python main_mask1.py --model=attnet
+- python main_mask1_messidor.py --model=attnet --dataset=musk1
+- python main_mask1_messidor.py --model=attnet --dataset=messidor
 
 ### mi-net (https://arxiv.org/abs/1610.02501):
 - python main.py --model=minet --dataset=elephant
 - python main.py --model=minet --dataset=fox
 - python main.py --model=minet --dataset=tiger
-- python main_mask1.py --model=minet
+- python main_mask1_messidor.py --model=minet --dataset=musk1
+- python main_mask1_messidor.py --model=minet --dataset=messidor
 
 #### Default values: 
 - Elephant, fox and tiger: epochs=10, folds=10, run=5, no_cuda=True
-- mask1: epochs=100, folds=10, run=5, no_cuda=True
+- mask1, messidor: epochs=50, folds=10, run=5, no_cuda=True
