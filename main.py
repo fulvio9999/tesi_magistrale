@@ -27,12 +27,13 @@ parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
 parser.add_argument('--no-cuda', action='store_true', default=True,
                     help='disables CUDA training')
-parser.add_argument('--model', type=str, default='attnet', help='Choose b/w attnet and minet')
+parser.add_argument('--model', type=str, default='minet', help='Choose b/w attnet and minet')
 parser.add_argument('--dataset', type=str, default='elephant', help='Choose b/w elephant, fox and tiger')
 
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 
+np.random.seed(args.seed)
 torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
@@ -112,15 +113,18 @@ def get_model():
 
 if __name__ == "__main__":   
     accs = np.zeros((args.run, args.folds), dtype=float)
+    seeds = [args.seed+i*5 for i in range(args.run)]
     for irun in range(args.run):
         accs_v=[]
         # aucs=[]
         bags, labels=create_bags_mat(path=path)
-        skf = StratifiedKFold(n_splits=args.folds, shuffle=True)
-        model, optimizer = get_model()
+        skf = StratifiedKFold(n_splits=args.folds, shuffle=True, random_state=seeds[irun])
+        # model, optimizer = get_model()
         for idx, (tr, ts) in enumerate(skf.split(bags, labels)):
     
             print('\n\nrun=', irun, '  fold=', idx)
+            model, optimizer = get_model()
+
             bags_tr=bags[tr]
             y_tr=labels[tr]
             bags_ts=bags[ts]

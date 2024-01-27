@@ -29,7 +29,7 @@ def create_bags_mat(path):
     labels=np.array(labels)
     return bags, labels
 
-def load_dataset(dataset_nm, n_folds):
+def load_dataset(dataset_nm, n_folds, seed):
     """Load data from file, do pre-processing, split it into train/test set.
     Parameters
     -----------------
@@ -73,7 +73,7 @@ def load_dataset(dataset_nm, n_folds):
     # random select 90% bags as train, others as test
     num_bag = len(bags_fea)
     
-    kf = KFold(n_splits=n_folds, shuffle=True, random_state=None)
+    kf = KFold(n_splits=n_folds, shuffle=True, random_state=seed)
     datasets = []
     for train_idx, test_idx in kf.split(bags_fea):
         dataset = {}

@@ -28,6 +28,7 @@ parser.add_argument('--dataset', type=str, default='musk1', help='Choose b/w mus
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 
+np.random.seed(args.seed)
 torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
@@ -102,16 +103,18 @@ def get_model():
 
 if __name__ == '__main__':
     # perform five times 10-fold cross-validation experiments
-    run = 5
-    n_folds = 10
+    run = args.run
+    n_folds = args.folds
+    seeds = [args.seed+i*5 for i in range(run)]
     accs = np.zeros((run, n_folds), dtype=float)
     for irun in range(run):
         accs_v=[]
         # aucs=[]
-        dataset = load_dataset(args.dataset, n_folds)
-        model, optimizer = get_model()
+        dataset = load_dataset(args.dataset, n_folds, seeds[irun])
+        # model, optimizer = get_model()
         for ifold in range(n_folds):
             print('\n\nrun=', irun, '  fold=', ifold)
+            model, optimizer = get_model()
 
             train_bags = dataset[ifold]['train']
             test_bags = dataset[ifold]['test']
