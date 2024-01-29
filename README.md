@@ -27,6 +27,7 @@
 - python main.py --model=attnet --dataset=fox
 - python main.py --model=attnet --dataset=tiger
 - python main_mask1_messidor.py --model=attnet --dataset=musk1
+- python main_mask1_messidor.py --model=attnet --dataset=musk2
 - python main_mask1_messidor.py --model=attnet --dataset=messidor
 
 ### mi-net (https://arxiv.org/abs/1610.02501):
@@ -34,12 +35,16 @@
 - python main.py --model=minet --dataset=fox
 - python main.py --model=minet --dataset=tiger
 - python main_mask1_messidor.py --model=minet --dataset=musk1
+- python main_mask1_messidor.py --model=minet --dataset=musk2
 - python main_mask1_messidor.py --model=minet --dataset=messidor
 
 ### MI-net (https://arxiv.org/abs/1610.02501):
 - python main.py --model=MInet --dataset=elephant
 - python main.py --model=MInet --dataset=fox
 - python main.py --model=MInet --dataset=tiger
+- python main_mask1_messidor.py --model=MInet --dataset=musk1
+- python main_mask1_messidor.py --model=MInet --dataset=musk2
+- python main_mask1_messidor.py --model=MInet --dataset=messidor
 
 ### BSN in pytorch (https://www.sciencedirect.com/science/article/abs/pii/S0020025519306826):
 - python BSN/main_bsn.py --dataset=elephant

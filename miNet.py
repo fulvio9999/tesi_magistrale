@@ -35,7 +35,8 @@ class MiNet(nn.Module):
         self.score_pooling = Score_pooling(output_dim, 64, pooling_mode)
 
     def forward(self, x):
-        x = x.squeeze(0)
+        if x.dim() > 2:
+            x = x.squeeze(0)
 
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))

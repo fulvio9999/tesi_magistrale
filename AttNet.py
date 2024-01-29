@@ -40,7 +40,9 @@ class Attention(nn.Module):
         )
 
     def forward(self, x):
-        x = x.squeeze(0)
+        if x.dim() > 2:
+            x = x.squeeze(0)
+        # print(x.dim())
 
         H = self.feature_extractor_part1(x)
         H = self.feature_extractor_part2(H) 

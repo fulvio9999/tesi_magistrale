@@ -36,7 +36,8 @@ class MINet(nn.Module):
         self.score_pooling = Score_pooling(output_dim, 64, pooling_mode)
 
     def forward(self, x):
-        x = x.squeeze(0)
+        if x.dim() > 2:
+            x = x.squeeze(0)
 
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
@@ -50,7 +51,7 @@ class MINet(nn.Module):
     
     def calculate_objective(self, X, Y):
         Y = Y.float()
-        Y_prob, _, _ = self.forward(X)
+        Y_prob, _ = self.forward(X)
         Y_prob = torch.clamp(Y_prob, min=1e-5, max=1. - 1e-5)
         loss = nn.BCELoss()(Y_prob, Y)
         # loss = self.compute_loss(Y_prob, Y)

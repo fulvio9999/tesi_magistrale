@@ -6,6 +6,7 @@ import numpy as np
 from sklearn.metrics import roc_auc_score as auc_roc
 from sklearn import metrics
 from AttNet import Attention
+from MI_net import MINet
 from dataset import convertToBatch, load_dataset, split_data_label
 from miNet import MiNet
 import numpy as np
@@ -23,7 +24,7 @@ parser.add_argument('--seed', type=int, default=1, metavar='S',
 parser.add_argument('--no-cuda', action='store_true', default=True,
                     help='disables CUDA training')
 parser.add_argument('--model', type=str, default='minet', help='Choose b/w attnet and minet')
-parser.add_argument('--dataset', type=str, default='musk1', help='Choose b/w musk1 or messidor')
+parser.add_argument('--dataset', type=str, default='musk1', help='Choose b/w musk1, musk2 or messidor')
 
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
@@ -34,7 +35,7 @@ if args.cuda:
     torch.cuda.manual_seed(args.seed)
     print('\nGPU is ON!')
 
-if args.dataset != "musk1" and args.dataset != "messidor":
+if args.dataset != "musk1" and args.dataset != "messidor" and args.dataset != "musk2":
     print("ERRORE: nome dataset errato!")
     exit(1)
 
@@ -89,12 +90,15 @@ def test(test_loader, model):
     return predictions, 1-test_error
 
 def get_model():
-    input_dim = 166 if args.dataset == "musk1" else 687
+    input_dim = 687 if args.dataset == "messidor" else 166
     if args.model == 'attnet':
         model = Attention(input_dim=input_dim).cuda() if args.cuda else Attention(input_dim=input_dim)
         optimizer = optim.SGD(model.parameters(), lr=5e-4, weight_decay=0.005, momentum=0.9, nesterov=True)
     elif args.model == 'minet':
         model = MiNet(input_dim, 1, pooling_mode='max')
+        optimizer = optim.SGD(model.parameters(), lr=5e-4, weight_decay=0.005, momentum=0.9, nesterov=True)
+    elif args.model == 'MInet':
+        model = MINet(input_dim, 1, pooling_mode='max')
         optimizer = optim.SGD(model.parameters(), lr=5e-4, weight_decay=0.005, momentum=0.9, nesterov=True)
     else:
         print("ERRORE: nome modello errato!")
