@@ -35,11 +35,11 @@ if args.cuda:
     print('\nGPU is ON!')
 
 if args.dataset == 'elephant':
-    path = '..\\data\\elephant_100x100_matlab.mat'
+    path = 'data\\elephant_100x100_matlab.mat'
 elif args.dataset == 'fox':
-    path = '..\\data\\fox_100x100_matlab.mat'
+    path = 'data\\fox_100x100_matlab.mat'
 elif args.dataset == 'tiger':
-    path = '..\\data\\tiger_100x100_matlab.mat'
+    path = 'data\\tiger_100x100_matlab.mat'
 else:
     print("ERRORE: nome dataset errato!")
     exit(1)
