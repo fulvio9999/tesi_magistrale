@@ -19,6 +19,11 @@
 - python main_mask1_messidor.py --model=minet --dataset=musk1
 - python main_mask1_messidor.py --model=minet --dataset=messidor
 
+### MI-net (https://arxiv.org/abs/1610.02501):
+- python main.py --model=MInet --dataset=elephant
+- python main.py --model=MInet --dataset=fox
+- python main.py --model=MInet --dataset=tiger
+
 ### BSN in pytorch (https://www.sciencedirect.com/science/article/abs/pii/S0020025519306826):
 - python BSN/main_bsn.py --dataset=elephant
 - python BSN/main_bsn.py --dataset=fox

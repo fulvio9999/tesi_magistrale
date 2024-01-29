@@ -7,12 +7,10 @@ import torch
 
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
-from sklearn.metrics import roc_auc_score as auc_roc
-from sklearn import metrics
-import scipy.io
 from sklearn.model_selection import StratifiedKFold
 from dataset import MyDataset, create_bags_mat
 from AttNet import Attention
+from MI_net import MINet
 from miNet import MiNet
 
 # Training settings
@@ -27,7 +25,8 @@ parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
 parser.add_argument('--no-cuda', action='store_true', default=True,
                     help='disables CUDA training')
-parser.add_argument('--model', type=str, default='minet', help='Choose b/w attnet and minet')
+parser.add_argument('--model', type=str, default='minet', help='Choose b/w attnet. MInet and minet')
+parser.add_argument('--model_save_dir', type=str, default='models', help='Choose path to save models')
 parser.add_argument('--dataset', type=str, default='elephant', help='Choose b/w elephant, fox and tiger')
 
 args = parser.parse_args()
@@ -106,6 +105,9 @@ def get_model():
     elif args.model == 'minet':
         model = MiNet(230, 1, pooling_mode='max')
         optimizer = optim.SGD(model.parameters(), lr=5e-4, weight_decay=0.005, momentum=0.9, nesterov=True)
+    elif args.model == 'MInet':
+        model = MINet(230, 1, pooling_mode='max')
+        optimizer = optim.SGD(model.parameters(), lr=5e-4, weight_decay=0.005, momentum=0.9, nesterov=True)
     else:
         print("ERRORE: nome modello errato!")
         exit(1)
@@ -133,8 +135,23 @@ if __name__ == "__main__":
             loader_training = DataLoader(MyDataset(bags_tr, y_tr), batch_size=1)
             loader_test = DataLoader(MyDataset(bags_ts, y_ts), batch_size=1)
 
+            # best_te_acc = 0.
+            # best_model, _ = get_model()
+
             for e in range(args.epochs):
                 train(e, loader_training, model, optimizer)
+
+            #     _, acc = test(loader_test, model)
+            #     # save model
+            #     if acc > best_te_acc:
+            #         print(f"Saving best model test_acc={acc}")
+            #         best_te_acc = acc
+            #         best_model.load_state_dict(copy.deepcopy(model.state_dict()))
+            # if idx==0 and irun==0:
+            #     torch.save(best_model.state_dict(), args.model_save_dir + '/' + args.model + '_' + args.dataset +'_best_model.pth')
+            # # model.load_state_dict(torch.load(args.model_save_dir + '/' + args.model + '_best_model.pth'))
+            # predictions, acc = test(loader_test, best_model)
+            # old_predictions, old_acc = test(loader_test, model)
             predictions, acc = test(loader_test, model)
 
             # auc=auc_roc(y_ts, predictions)
@@ -148,6 +165,7 @@ if __name__ == "__main__":
             # Acc2=(TP+TN)/len(y_ts)
             # acc=max(Acc2)
             print (f'accuracy (fold {idx})=', acc)
+            # print (f'accuracy OLD (fold {idx})=', old_acc)
             accs[irun][idx] = acc
             accs_v.append(acc)
         
