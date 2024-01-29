@@ -1,3 +1,20 @@
+# BSN TENSORFLOW
+## CONFIGURATION:
+1. conda create -n tf tensorflow
+2. conda activate tf
+3. conda install pip
+4. pip install -r BSN_tensorflow/requirements_tf.txt
+
+## RUNNING:
+### BSN (https://www.sciencedirect.com/science/article/abs/pii/S0020025519306826):
+- python BSN_tensorflow/main_bsn_tf.py --dataset=elephant
+- python BSN_tensorflow/main_bsn_tf.py --dataset=fox
+- python BSN_tensorflow/main_bsn_tf.py --dataset=tiger
+
+#### Default values: 
+- Elephant, fox and tiger: train_inters=5000, folds=10, run=5
+
+# OTHERS (PYTORCH)
 ## CONFIGURATION:
 1. conda create -n yourenvname python=3.7
 2. conda activate yourenvname
