@@ -19,6 +19,11 @@
 - python main_mask1_messidor.py --model=minet --dataset=musk1
 - python main_mask1_messidor.py --model=minet --dataset=messidor
 
+### BSN in pytorch (https://www.sciencedirect.com/science/article/abs/pii/S0020025519306826):
+- python BSN/main_bsn.py --dataset=elephant
+- python BSN/main_bsn.py --dataset=fox
+- python BSN/main_bsn.py --dataset=tiger
+
 #### Default values: 
 - Elephant, fox and tiger: epochs=10, folds=10, run=5, no_cuda=True
 - mask1, messidor: epochs=50, folds=10, run=5, no_cuda=True
