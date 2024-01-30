@@ -7,6 +7,7 @@ from sklearn.metrics import roc_auc_score as auc_roc
 from sklearn import metrics
 from AttNet import Attention
 from MI_net import MINet
+from SA_abmilp import SA_ABMILP
 from dataset import convertToBatch, load_dataset, split_data_label
 from miNet import MiNet
 import numpy as np
@@ -23,7 +24,7 @@ parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
 parser.add_argument('--no-cuda', action='store_true', default=True,
                     help='disables CUDA training')
-parser.add_argument('--model', type=str, default='minet', help='Choose b/w attnet and minet')
+parser.add_argument('--model', type=str, default='minet', help='Choose b/w attnet. MInet, minet and SA-ABMILP')
 parser.add_argument('--dataset', type=str, default='musk1', help='Choose b/w musk1, musk2 or messidor')
 
 args = parser.parse_args()
@@ -100,6 +101,9 @@ def get_model():
     elif args.model == 'MInet':
         model = MINet(input_dim, 1, pooling_mode='max')
         optimizer = optim.SGD(model.parameters(), lr=5e-4, weight_decay=0.005, momentum=0.9, nesterov=True)
+    elif args.model == 'SA-ABMILP':
+        model = SA_ABMILP(True, input_dim)
+        optimizer = optim.Adam(model.parameters(), lr=0.00001, betas=(0.9, 0.999), weight_decay=10e-5,)
     else:
         print("ERRORE: nome modello errato!")
         exit(1)

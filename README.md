@@ -46,6 +46,14 @@
 - python main_mask_messidor.py --model=MInet --dataset=musk2
 - python main_mask_messidor.py --model=MInet --dataset=messidor
 
+### SA-ABMILP (https://arxiv.org/abs/2005.12991):
+- python main.py --model=SA-ABMILP --dataset=elephant
+- python main.py --model=SA-ABMILP --dataset=fox
+- python main.py --model=SA-ABMILP --dataset=tiger
+- python main_mask_messidor.py --model=SA-ABMILP--dataset=musk1
+- python main_mask_messidor.py --model=SA-ABMILP --dataset=musk2
+- python main_mask_messidor.py --model=SA-ABMILP --dataset=messidor
+
 ### BSN in pytorch (https://www.sciencedirect.com/science/article/abs/pii/S0020025519306826):
 - python BSN/main_bsn.py --dataset=elephant
 - python BSN/main_bsn.py --dataset=fox
